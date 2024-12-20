@@ -1,0 +1,33 @@
+{
+  "name": "backend-repo",
+  "version": "1.0.0",
+  "description": "ebuddy-backend-repo",
+  "main": "core/app.ts",
+  "scripts": {
+    "test": "test",
+    "start": "npx tsx core/app.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Reza1290/backend-repo.git"
+  },
+  "author": "Reza1290",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Reza1290/backend-repo/issues"
+  },
+  "homepage": "https://github.com/Reza1290/backend-repo#readme",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "firebase": "^11.1.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
