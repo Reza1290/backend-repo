@@ -1,5 +1,5 @@
 import express from 'express'
-import { getUsersData, insertDummyData, signJwt, updateUserData } from '../controller/api'
+import { getUsersData, insertDummyData, updateUserData } from '../controller/api'
 const userRouter = express.Router()
 
 

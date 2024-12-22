@@ -1,37 +1,12 @@
 import { db } from '../config/firebaseConfig'
 import { User } from '../entities/user'
-import {
-    collection,
-    doc,
-    getDoc,
-    updateDoc,
-    getDocs,
-    addDoc,
-    where,
-    query,
-} from 'firebase/firestore'
 
+const userCollection = 'USERS'
 
-const userCollection = collection(db, 'USERS');
-
-
-export const getUserById = async (id: string): Promise<User | null> => {
-    try {
-        const userDoc = await getDoc(doc(db, 'USERS', id))
-
-        if (!userDoc.exists()) {
-            return null
-        }
-        return { id: userDoc.id, ...userDoc.data() } as User
-    } catch (error) {
-        console.error(error)
-        throw error
-    }
-}
 
 export const getUsers = async (): Promise<User[] | null> => {
     try {
-        const userDocs = await getDocs(userCollection)
+        const userDocs = await db.collection(userCollection).get()
 
         if (userDocs.empty) {
             return null
@@ -46,28 +21,54 @@ export const getUsers = async (): Promise<User[] | null> => {
     }
 }
 
-export const updateUser = async (id: string, user: Partial<User>): Promise<void> => {
+export const updateUser = async (user: Partial<User>): Promise<void> => {
+    if (!user.id) {
+        throw new Error('Invalid user ID');
+    }
+
     try {
-        const userCollection = collection(db, 'USERS')
-        const q = query(userCollection, where('email', '==', user.email))
-        const querySnapshot = await getDocs(q)
-        if (!querySnapshot.empty) { throw new Error('Email already exists') }
-        await updateDoc(doc(db, "USERS", id), user)
+        const userDocRef = db.collection(userCollection).doc(user.id);
+        const userDoc = await userDocRef.get();
+
+        if (!userDoc.exists) {
+            throw new Error('User does not exist');
+        }
+
+        if (user.email) {
+            const checkEmail = await db.collection(userCollection).where('email', '==', user.email).get();
+            const conflictUser = checkEmail.docs.find(doc => doc.id !== user.id);
+            if (conflictUser) {
+                throw new Error('User with that email already exists');
+            }
+        }
+
+        await userDocRef.update(user);
+
     } catch (error) {
-        console.error("Error update users", error)
-        throw error
+        console.error("Error updating user:", error);
+        throw error;
     }
 };
 
+
 export const insertUser = async (user: Partial<User>): Promise<void> => {
     try {
-        const userCollection = collection(db, 'USERS')
-        const q = query(userCollection, where('email', '==', user.email))
-        const querySnapshot = await getDocs(q)
-        if (!querySnapshot.empty) { throw new Error('Email already exists') }
-        await addDoc(userCollection, user)
+        const userColl = db.collection('USERS');
+
+        if (user.email) {
+            const emailQuery = await userColl
+                .where('email', '==', user.email)
+                .get();
+
+            if (!emailQuery.empty) {
+                throw new Error('Email already exists');
+            }
+        }
+
+
+        await userColl.add(user);
     } catch (error) {
-        console.error("Error insert users", error)
+        console.error("Error inserting user:", error)
         throw error
     }
 }
